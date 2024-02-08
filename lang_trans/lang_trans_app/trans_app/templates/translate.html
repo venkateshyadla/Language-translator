@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Translator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right,white,rgb(182, 184, 184));
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .translator-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family:Georgia, 'Times New Roman', Times, serif;
+        }
+
+        select {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+
+        #translate-input, #translated-output {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            font-family:Georgia, 'Times New Roman', Times, serif;
+            border-radius: 10px;
+            box-shadow: 1px 2px 4px rgb(124, 126, 126);
+            
+            margin: 10px;
+        }
+        #translate-input:hover, #translated-output:hover,#text-to-speech-btn:hover{
+            box-shadow: 5px 6px 15px rgb(51, 52, 52);
+        }
+
+        #translate-btn {
+            padding: 10px;
+            font-size: 16px;
+            font-family:Georgia, 'Times New Roman', Times, serif;
+            cursor: pointer;
+            background-color: rgb(121, 144, 145);
+            color: white;
+            border-radius: 5px;
+            box-shadow: 1px 2px 4px rgb(124, 126, 126);
+            transition:1s;
+        }
+        #translate-btn:hover{
+            box-shadow: 5px 6px 15px rgb(51, 52, 52);
+            width:105px;
+            height: 42px;
+        }
+
+        #text-to-speech-btn {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 1px 2px 4px rgb(124, 126, 126);
+            margin-top: 10px;
+        }
+
+        .result-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            width: 320px;
+        }
+        table{
+            border:0px solid #000000;
+            text-align: center;
+            font-family:Georgia, 'Times New Roman', Times, serif;
+            font-style: oblique;
+            padding-left: 10% auto;
+            padding-right: 10% auto;
+        }
+        #heading{
+            position: absolute;
+            top: 20px;
+            font-family:Georgia, 'Times New Roman', Times, serif;
+            text-shadow:2px 2px 4px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <form method="post" action="{% url 'translate_text' %}">
+        {% csrf_token %}
+        <h1 id="heading">Language Translation Tool</h1>
+        <div class="translator-container">
+            <div>
+                <table>
+                <td><label for="input-language">Source Language</label></td>
+                <td><label for="target-language">Target Language</label></td>
+                <tr>
+                <td>
+                <select name="source_language" id="input-language">
+                    {% for code, name in language_choices %}
+                        <option value="{{ code }}">{{ name }}</option>
+                    {% endfor %}
+                </select></td>
+            
+                    <td>
+                <select name="target_language" id="target-language">
+                    {% for code, name in language_choices %}
+                        <option value="{{ code }}">{{ name }}</option>
+                    {% endfor %}
+                </select></td>
+            </tr>
+            </table>
+                
+            </div>
+
+            <label for="translate-input">Text to Translate:</label>
+            <textarea name="text_to_translate" id="translate-input"></textarea>
+            <br>
+
+            <button id="translate-btn" type="submit">Translate</button>
+            {% if translation_result.translated_text %}
+            <div id="translated-output" class="result-box" style="color: green; border: 1px solid green;"><b>{{ translation_result.translated_text }}</b></div>
+            {% endif %}
+            {% if err_msg %}
+            <div id="translated-output" class="result-box" style="color: red; border: 1px solid red;">{{err_msg}}</div>
+            {% endif %}
+            <button type="button" id="text-to-speech-btn" onclick="speakTranslatedText()">Speak Translation</button>
+        </div>
+
+        <script>
+            var translatedText = {{ translation_result.speech|safe }};
+            function speakTranslatedText() {
+                var speechSynthesis = window.speechSynthesis;
+                var speechUtterance = new SpeechSynthesisUtterance(translatedText);
+                speechSynthesis.speak(speechUtterance);
+            }
+        </script>
+    </form>
+</body>
+</html>
